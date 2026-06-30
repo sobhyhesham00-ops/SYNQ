@@ -141,6 +141,8 @@ import {
   CreditCard,
   Volume2,
   VolumeX,
+  Grid,
+  CalendarRange,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { AIChatWidget } from "./AIChatWidget";
@@ -4946,6 +4948,22 @@ ${pageText}
   const [manualRosterNotes, setManualRosterNotes] = useState("");
   const [selectedShiftForActivities, setSelectedShiftForActivities] =
     useState<ScheduledShift | null>(null);
+  const [activeInlineCell, setActiveInlineCell] = useState<{
+    agentName: string;
+    date: string;
+    findShift?: ScheduledShift;
+  } | null>(null);
+  const [draggedOverCell, setDraggedOverCell] = useState<{
+    agentName: string;
+    date: string;
+  } | null>(null);
+
+  const [showPatternPanel, setShowPatternPanel] = useState(false);
+  const [patternAgent, setPatternAgent] = useState("");
+  const [patternShift, setPatternShift] = useState("07:00 - 16:00");
+  const [patternWeekdays, setPatternWeekdays] = useState<number[]>([1, 2, 3, 4, 5]); // Default Mon-Fri
+  const [patternStartDate, setPatternStartDate] = useState("");
+  const [patternEndDate, setPatternEndDate] = useState("");
 
   const [annualStart, setAnnualStart] = useState("");
   const [annualEnd, setAnnualEnd] = useState("");
@@ -6949,6 +6967,133 @@ ${result.errors.slice(0, 5).join("\n")}${
     reader.readAsArrayBuffer(file);
   };
 
+  const getShiftConflicts = (
+    agentName: string,
+    dateStr: string,
+    currentShiftLabel: string,
+    currentShiftId?: string,
+  ): string[] => {
+    if (!agentName || !dateStr || !currentShiftLabel || currentShiftLabel.toLowerCase() === "off") return [];
+    
+    const warnings: string[] = [];
+
+    // 1. Double-booking
+    const doubleBookings = schedules.filter(
+      (s) =>
+        s &&
+        s.agentName &&
+        s.agentName.toLowerCase() === agentName.toLowerCase() &&
+        s.date === dateStr &&
+        s.id !== currentShiftId &&
+        s.shiftLabel &&
+        s.shiftLabel.toLowerCase() !== "off"
+    );
+    if (doubleBookings.length > 0) {
+      warnings.push(`Double-booking: ${agentName} already has another shift (${doubleBookings[0].shiftLabel}) on ${dateStr}.`);
+    }
+
+    // 2. More than 6 consecutive scheduled days
+    const getPrevDateStr = (baseDate: string, daysAgo: number) => {
+      const d = new Date(baseDate + "T12:00:00");
+      d.setDate(d.getDate() - daysAgo);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    let consecutiveDays = 0;
+    for (let i = 1; i <= 6; i++) {
+      const checkDate = getPrevDateStr(dateStr, i);
+      const dayShift = schedules.find(
+        (s) =>
+          s &&
+          s.agentName &&
+          s.agentName.toLowerCase() === agentName.toLowerCase() &&
+          s.date === checkDate &&
+          s.shiftLabel &&
+          s.shiftLabel.toLowerCase() !== "off" &&
+          s.id !== currentShiftId
+      );
+      if (dayShift) {
+        consecutiveDays++;
+      } else {
+        break;
+      }
+    }
+    if (consecutiveDays >= 6) {
+      warnings.push(`Consecutive Work: This would make ${consecutiveDays + 1} consecutive working days for ${agentName}.`);
+    }
+
+    // 3. Less than 11 hours rest period
+    const parseShiftTimes = (label: string) => {
+      if (!label || label.toLowerCase() === "off" || !label.includes("-")) return null;
+      const parts = label.split("-");
+      if (parts.length !== 2) return null;
+      const startParts = parts[0].trim().split(":");
+      const endParts = parts[1].trim().split(":");
+      if (startParts.length < 2 || endParts.length < 2) return null;
+      const startHour = parseInt(startParts[0], 10);
+      const startMin = parseInt(startParts[1], 10);
+      const endHour = parseInt(endParts[0], 10);
+      const endMin = parseInt(endParts[1], 10);
+      return { startHour, startMin, endHour, endMin };
+    };
+
+    const getRestPeriodHours = (labelA: string, labelB: string): number | null => {
+      const timesA = parseShiftTimes(labelA);
+      const timesB = parseShiftTimes(labelB);
+      if (!timesA || !timesB) return null;
+
+      const startA = timesA.startHour + timesA.startMin / 60;
+      let endA = timesA.endHour + timesA.endMin / 60;
+      if (endA <= startA) {
+        endA += 24;
+      }
+
+      const startB = (timesB.startHour + timesB.startMin / 60) + 24;
+      return startB - endA;
+    };
+
+    const yesterdayDate = getPrevDateStr(dateStr, 1);
+    const yesterdayShift = schedules.find(
+      (s) =>
+        s &&
+        s.agentName &&
+        s.agentName.toLowerCase() === agentName.toLowerCase() &&
+        s.date === yesterdayDate &&
+        s.shiftLabel &&
+        s.shiftLabel.toLowerCase() !== "off" &&
+        s.id !== currentShiftId
+    );
+    if (yesterdayShift) {
+      const rest = getRestPeriodHours(yesterdayShift.shiftLabel, currentShiftLabel);
+      if (rest !== null && rest < 11) {
+        warnings.push(`Rest Period: Only ${rest.toFixed(1)} hours of rest between yesterday's shift (${yesterdayShift.shiftLabel}) and today.`);
+      }
+    }
+
+    const tomorrowDate = getPrevDateStr(dateStr, -1);
+    const tomorrowShift = schedules.find(
+      (s) =>
+        s &&
+        s.agentName &&
+        s.agentName.toLowerCase() === agentName.toLowerCase() &&
+        s.date === tomorrowDate &&
+        s.shiftLabel &&
+        s.shiftLabel.toLowerCase() !== "off" &&
+        s.id !== currentShiftId
+    );
+    if (tomorrowShift) {
+      const rest = getRestPeriodHours(currentShiftLabel, tomorrowShift.shiftLabel);
+      if (rest !== null && rest < 11) {
+        warnings.push(`Rest Period: Only ${rest.toFixed(1)} hours of rest between today and tomorrow's shift (${tomorrowShift.shiftLabel}).`);
+      }
+    }
+
+    return warnings;
+  };
+
   const handleManualRosterSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!manualRosterAgent) {
@@ -6964,8 +7109,30 @@ ${result.errors.slice(0, 5).join("\n")}${
       return;
     }
 
+    if (manualRosterShift === "Off") {
+      handleDeleteManualRoster(manualRosterAgent, manualRosterDate);
+      setManualRosterNotes("");
+      return;
+    }
+
+    const existingShift = schedules.find(
+      (s) =>
+        s &&
+        s.agentName &&
+        s.agentName.toLowerCase() === manualRosterAgent.toLowerCase() &&
+        s.date === manualRosterDate
+    );
+
+    const conflicts = getShiftConflicts(
+      manualRosterAgent,
+      manualRosterDate,
+      manualRosterShift,
+      existingShift?.id
+    );
+    conflicts.forEach((c) => toast.warning(c, { duration: 6000 }));
+
     const newShift: ScheduledShift = {
-      id: `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: existingShift?.id || `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       agentName: manualRosterAgent,
       date: manualRosterDate,
       shiftLabel: manualRosterShift,
@@ -6977,6 +7144,165 @@ ${result.errors.slice(0, 5).join("\n")}${
     toast.success(
       `Individual shift for ${manualRosterAgent} successfully submitted and synced!`,
     );
+  };
+
+  const handleDeleteManualRoster = async (agentName: string, dateStr: string) => {
+    const findShift = schedules.find(
+      (s) =>
+        s &&
+        s.agentName &&
+        s.agentName.toLowerCase() === agentName.toLowerCase() &&
+        s.date === dateStr,
+    );
+    if (findShift) {
+      try {
+        setSchedules((prev) => prev.filter((s) => s.id !== findShift.id));
+        await deleteDoc(doc(db, "schedules", findShift.id));
+        
+        const userDocId = agentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+        if (userDocId) {
+          await setDoc(
+            doc(db, "users", userDocId),
+            {
+              assignedShifts: {
+                [dateStr]: "Not Scheduled",
+              },
+            },
+            { merge: true },
+          );
+          
+          const agentSchedulesRef = doc(
+            collection(doc(collection(db, "agents"), userDocId), "schedules"),
+            dateStr,
+          );
+          await deleteDoc(agentSchedulesRef);
+        }
+        toast.success(`Removed shift for ${agentName} on ${dateStr}`);
+      } catch (err: any) {
+        console.error("Delete shift error:", err);
+        toast.error("Failed to delete shift.");
+      }
+    } else {
+      toast.error("No scheduled shift found to delete.");
+    }
+  };
+
+  const copyCurrentPeriodToNext = () => {
+    if (activeDisplayDates.length === 0) {
+      toast.error("No active display dates visible.");
+      return;
+    }
+
+    const getNextDateStr = (dateStr: string, daysForward: number) => {
+      const d = new Date(dateStr + "T12:00:00");
+      d.setDate(d.getDate() + daysForward);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    };
+
+    let countCopied = 0;
+    const newShifts: ScheduledShift[] = [];
+
+    // Find all shifts in current activeDisplayDates
+    const currentShifts = schedules.filter(
+      (s) => s && s.date && activeDisplayDates.includes(s.date) && s.shiftLabel && s.shiftLabel.toLowerCase() !== "off"
+    );
+
+    currentShifts.forEach((s) => {
+      const targetDate = getNextDateStr(s.date, displayDaysCount);
+      // Skip if agent already has a shift on the target date
+      const alreadyHasShift = schedules.some(
+        (existing) =>
+          existing &&
+          existing.agentName &&
+          existing.agentName.toLowerCase() === s.agentName.toLowerCase() &&
+          existing.date === targetDate &&
+          existing.shiftLabel &&
+          existing.shiftLabel.toLowerCase() !== "off"
+      );
+      if (!alreadyHasShift) {
+        newShifts.push({
+          id: `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          agentName: s.agentName,
+          date: targetDate,
+          shiftLabel: s.shiftLabel,
+          shiftNotes: s.shiftNotes || undefined,
+        });
+        countCopied++;
+      }
+    });
+
+    if (newShifts.length > 0) {
+      commitSchedulesManual(newShifts, [], {});
+      toast.success(`Copied ${countCopied} shift(s) to the next ${displayDaysCount} days!`);
+    } else {
+      toast.info("No new shifts to copy (all target agent/date combinations already have shifts).");
+    }
+  };
+
+  const applyPatternSubmit = () => {
+    if (!patternAgent) {
+      toast.error("Please select an agent for the pattern.");
+      return;
+    }
+    if (!patternStartDate || !patternEndDate) {
+      toast.error("Please specify a complete start and end date range.");
+      return;
+    }
+
+    const start = new Date(patternStartDate + "T00:00:00");
+    const end = new Date(patternEndDate + "T23:59:59");
+
+    if (end < start) {
+      toast.error("End date must be on or after start date.");
+      return;
+    }
+
+    const newShifts: ScheduledShift[] = [];
+    let countCreated = 0;
+
+    const current = new Date(start);
+    while (current <= end) {
+      const dayOfWeek = current.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+      if (patternWeekdays.includes(dayOfWeek)) {
+        const yyyy = current.getFullYear();
+        const mm = String(current.getMonth() + 1).padStart(2, "0");
+        const dd = String(current.getDate()).padStart(2, "0");
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        // Skip if agent already has a shift on this date
+        const alreadyHasShift = schedules.some(
+          (s) =>
+            s &&
+            s.agentName &&
+            s.agentName.toLowerCase() === patternAgent.toLowerCase() &&
+            s.date === dateStr &&
+            s.shiftLabel &&
+            s.shiftLabel.toLowerCase() !== "off"
+        );
+
+        if (!alreadyHasShift) {
+          newShifts.push({
+            id: `sch_man_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            agentName: patternAgent,
+            date: dateStr,
+            shiftLabel: patternShift,
+          });
+          countCreated++;
+        }
+      }
+      current.setDate(current.getDate() + 1);
+    }
+
+    if (newShifts.length > 0) {
+      commitSchedulesManual(newShifts, [], {});
+      toast.success(`Pattern applied: created ${countCreated} shifts for ${patternAgent}!`);
+      setShowPatternPanel(false);
+    } else {
+      toast.info("No shifts created (matching dates already had scheduled shifts).");
+    }
   };
 
   // Agent Time Clock & Activity Helpers
@@ -23493,6 +23819,36 @@ ${ttNotes}`
                                     Full Month
                                   </button>
                                 </div>
+
+                                {/* Bulk Tools (Copy to Next, Apply Pattern) */}
+                                {(isSuperAdmin || isTLOreSupport) && (
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={copyCurrentPeriodToNext}
+                                      className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer"
+                                      title={`Copy current ${displayDaysCount} days schedule forward`}
+                                    >
+                                      <Copy className="w-3.5 h-3.5" />
+                                      Copy to Next Period
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setShowPatternPanel(!showPatternPanel);
+                                        // Auto prefill start/end date from currently visible display dates if empty
+                                        if (activeDisplayDates.length > 0) {
+                                          if (!patternStartDate) setPatternStartDate(activeDisplayDates[0]);
+                                          if (!patternEndDate) setPatternEndDate(activeDisplayDates[activeDisplayDates.length - 1]);
+                                        }
+                                      }}
+                                      className={`px-3 py-1.5 border rounded-xl text-[11px] font-bold transition flex items-center gap-1.5 cursor-pointer ${showPatternPanel ? "bg-indigo-500 text-white border-transparent" : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/8"}`}
+                                    >
+                                      <Grid className="w-3.5 h-3.5" />
+                                      Apply Pattern
+                                    </button>
+                                  </div>
+                                )}
                               </div>
 
                               {/* Horizontal Paging Actions */}
@@ -23537,35 +23893,173 @@ ${ttNotes}`
                                   </button>
                                 </div>
 
-                                {["agent", "sme"].includes(
-                                  currentUser.role as string,
-                                ) && (
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      onClick={syncShiftsToGoogleCalendar}
-                                      disabled={isSyncingCalendar}
-                                      className="px-4 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-[11px] font-bold transition-all flex items-center gap-2"
-                                      title="Sync with Google Calendar"
-                                    >
-                                      {isSyncingCalendar ? (
-                                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                      ) : (
-                                        <Calendar className="w-3.5 h-3.5" />
-                                      )}
-                                      Sync Google
-                                    </button>
-                                    <button
-                                      onClick={downloadShiftsICS}
-                                      className="px-4 py-1.5 bg-white/20 hover:bg-slate-600 text-white rounded-xl text-[11px] font-bold transition-all flex items-center gap-2"
-                                      title="Download .ics for Outlook/Apple Calendar"
-                                    >
-                                      <Download className="w-3.5 h-3.5" />
-                                      Save Other
-                                    </button>
-                                  </div>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => window.print()}
+                                    className="px-4 py-1.5 bg-white/5 hover:bg-white/10 border border-white/12 text-slate-100 rounded-xl text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer"
+                                    title="Print Roster Grid"
+                                  >
+                                    <Printer className="w-3.5 h-3.5 text-indigo-400" />
+                                    Print Roster
+                                  </button>
+
+                                  {["agent", "sme"].includes(
+                                    currentUser.role as string,
+                                  ) && (
+                                    <>
+                                      <button
+                                        onClick={syncShiftsToGoogleCalendar}
+                                        disabled={isSyncingCalendar}
+                                        className="px-4 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 text-white rounded-xl text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer"
+                                        title="Sync with Google Calendar"
+                                      >
+                                        {isSyncingCalendar ? (
+                                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                        ) : (
+                                          <Calendar className="w-3.5 h-3.5" />
+                                        )}
+                                        Sync Google
+                                      </button>
+                                      <button
+                                        onClick={downloadShiftsICS}
+                                        className="px-4 py-1.5 bg-white/20 hover:bg-slate-600 text-white rounded-xl text-[11px] font-bold transition-all flex items-center gap-2 cursor-pointer"
+                                        title="Download .ics for Outlook/Apple Calendar"
+                                      >
+                                        <Download className="w-3.5 h-3.5" />
+                                        Save Other
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
+
+                            {/* Apply Pattern panel */}
+                            {showPatternPanel && (isSuperAdmin || isTLOreSupport) && (
+                              <div className="p-4 bg-slate-900 border border-white/12 rounded-xl flex flex-col gap-4 text-slate-100 font-sans mt-4">
+                                <div className="flex justify-between items-center border-b border-white/8 pb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Grid className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-xs font-bold text-slate-200">Bulk Apply Shift Pattern</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowPatternPanel(false)}
+                                    className="p-1 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                  {/* Agent Selection */}
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Agent</label>
+                                    <select
+                                      value={patternAgent}
+                                      onChange={(e) => setPatternAgent(e.target.value)}
+                                      className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                      <option value="">-- Select Agent --</option>
+                                      {/* Extract active unique agents list from either rosters or users */}
+                                      {Array.from(new Set(schedules.map(s => s.agentName).filter(Boolean))).sort().map(name => (
+                                        <option key={name} value={name}>{name}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Shift Selection */}
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Shift Type</label>
+                                    <select
+                                      value={patternShift}
+                                      onChange={(e) => setPatternShift(e.target.value)}
+                                      className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                    >
+                                      {SHIFTS.map((s) => (
+                                        <option key={s.id} value={s.label}>
+                                          {s.display} ({s.label})
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Start Date */}
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Start Date</label>
+                                    <input
+                                      type="date"
+                                      value={patternStartDate}
+                                      onChange={(e) => setPatternStartDate(e.target.value)}
+                                      className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                  </div>
+
+                                  {/* End Date */}
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">End Date</label>
+                                    <input
+                                      type="date"
+                                      value={patternEndDate}
+                                      onChange={(e) => setPatternEndDate(e.target.value)}
+                                      className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Weekdays selection (Mon-Sun checkboxes) */}
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Repeat on Days</label>
+                                  <div className="flex flex-wrap gap-3">
+                                    {[
+                                      { label: "Mon", value: 1 },
+                                      { label: "Tue", value: 2 },
+                                      { label: "Wed", value: 3 },
+                                      { label: "Thu", value: 4 },
+                                      { label: "Fri", value: 5 },
+                                      { label: "Sat", value: 6 },
+                                      { label: "Sun", value: 0 },
+                                    ].map((day) => {
+                                      const checked = patternWeekdays.includes(day.value);
+                                      return (
+                                        <label key={day.value} className="flex items-center gap-1.5 cursor-pointer text-xs select-none">
+                                          <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={() => {
+                                              if (checked) {
+                                                setPatternWeekdays(patternWeekdays.filter(v => v !== day.value));
+                                              } else {
+                                                setPatternWeekdays([...patternWeekdays, day.value]);
+                                              }
+                                            }}
+                                            className="w-3.5 h-3.5 rounded border-white/12 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 focus:outline-none cursor-pointer"
+                                          />
+                                          <span className={checked ? "text-indigo-400 font-bold" : "text-slate-400"}>{day.label}</span>
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-2 justify-end border-t border-white/8 pt-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowPatternPanel(false)}
+                                    className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold rounded-lg transition cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={applyPatternSubmit}
+                                    className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition cursor-pointer"
+                                  >
+                                    Apply Pattern
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
                             {/* Active Schedule visual Matrix grid */}
                             <div className="bg-white/5 border border-white/8 rounded-xl p-5 sm:p-6 space-y-4">
@@ -23676,7 +24170,7 @@ ${ttNotes}`
                                     };
 
                                     return (
-                                      <div className="bg-[#12121e]/85 border border-transparent rounded-xl p-5 space-y-4 mb-6 text-left relative overflow-hidden">
+                                      <div className="bg-white/5 border border-white/8 rounded-xl p-5 space-y-4 mb-6 text-left relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
                                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -24179,8 +24673,56 @@ ${ttNotes}`
                                     );
                                   })()}
 
-                                  {/* Desktop Matrix Grid View */}
-                                  <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/8 rounded-xl bg-white/[0.04]">
+                                  {/* Shift Color Legend Strip */}
+                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400 py-2.5 mb-2">
+                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Legend:</span>
+                                    {SHIFTS.map((s) => {
+                                      const badgeStyle = getShiftBadgeStyle(s.label);
+                                      let dotClass = "bg-slate-400";
+                                      if (badgeStyle.bg.includes("sky-500")) dotClass = "bg-sky-400";
+                                      else if (badgeStyle.bg.includes("amber-500")) dotClass = "bg-amber-400";
+                                      else if (badgeStyle.bg.includes("purple-500")) dotClass = "bg-purple-400";
+                                      return (
+                                        <div key={s.id} className="flex items-center gap-1.5">
+                                          <span className={`w-2 h-2 rounded-full ${dotClass}`} />
+                                          <span className="text-slate-300 font-medium">{s.display} ({s.label})</span>
+                                        </div>
+                                      );
+                                    })}
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full bg-slate-500" />
+                                      <span className="text-slate-300 font-medium">Off / Rest Day</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Print Roster wrapper */}
+                                  <div id="roster-print-area" className="w-full">
+                                    <style>{`
+                                      @media print {
+                                        body * {
+                                          visibility: hidden !important;
+                                        }
+                                        #roster-print-area, #roster-print-area * {
+                                          visibility: visible !important;
+                                        }
+                                        #roster-print-area {
+                                          position: absolute !important;
+                                          left: 0 !important;
+                                          top: 0 !important;
+                                          width: 100% !important;
+                                          background: #0f172a !important;
+                                          color: #f1f5f9 !important;
+                                        }
+                                        /* Force background colors to print */
+                                        * {
+                                          -webkit-print-color-adjust: exact !important;
+                                          print-color-adjust: exact !important;
+                                        }
+                                      }
+                                    `}</style>
+
+                                    {/* Desktop Matrix Grid View */}
+                                    <div className="hidden lg:block overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 border border-white/8 rounded-xl bg-white/[0.04]">
                                     <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                                       <thead>
                                         <tr className="bg-white/5 border-b border-white/8">
@@ -24281,18 +24823,114 @@ ${ttNotes}`
                                                     <td
                                                       key={dateStr}
                                                       onClick={() => {
-                                                        if (
-                                                          isSuperAdmin &&
-                                                          findShift
-                                                        )
-                                                          setSelectedShiftForActivities(
-                                                            { ...findShift },
-                                                          );
+                                                        if (isSuperAdmin || isTLOreSupport) {
+                                                          setActiveInlineCell({
+                                                            agentName,
+                                                            date: dateStr,
+                                                            findShift,
+                                                          });
+                                                          setManualRosterAgent(agentName);
+                                                          setManualRosterDate(dateStr);
+                                                          setManualRosterShift(findShift ? findShift.shiftLabel : "07:00 - 16:00");
+                                                          setManualRosterNotes(findShift?.shiftNotes || "");
+                                                        }
                                                       }}
-                                                      className={`p-1 border-r border-white/8 hover:bg-white/20 /40 transition-all relative group ${isSuperAdmin && findShift ? "cursor-pointer hover:ring-1 ring-inset ring-indigo-500/50" : "cursor-help"}`}
+                                                      onDragOver={(e) => {
+                                                        if (isSuperAdmin || isTLOreSupport) {
+                                                          e.preventDefault();
+                                                          if (draggedOverCell?.agentName !== agentName || draggedOverCell?.date !== dateStr) {
+                                                            setDraggedOverCell({ agentName, date: dateStr });
+                                                          }
+                                                        }
+                                                      }}
+                                                      onDragLeave={() => {
+                                                        if (isSuperAdmin || isTLOreSupport) {
+                                                          setDraggedOverCell(null);
+                                                        }
+                                                      }}
+                                                      onDrop={async (e) => {
+                                                        if (!(isSuperAdmin || isTLOreSupport)) return;
+                                                        setDraggedOverCell(null);
+                                                        e.preventDefault();
+                                                        try {
+                                                          const rawData = e.dataTransfer.getData("text/plain");
+                                                          if (!rawData) return;
+                                                          const { shiftId, originalAgentName, originalDate } = JSON.parse(rawData);
+                                                          if (!shiftId) return;
+
+                                                          if (originalAgentName.toLowerCase() === agentName.toLowerCase() && originalDate === dateStr) {
+                                                            return;
+                                                          }
+
+                                                          const shiftToMove = schedules.find((s) => s && s.id === shiftId);
+                                                          if (!shiftToMove) {
+                                                            toast.error("Could not find the original shift record.");
+                                                            return;
+                                                          }
+
+                                                          const updatedShift: ScheduledShift = (() => {
+                                                            const warnings: string[] = [];
+                                                            const origLob = getAgentLOB(originalAgentName);
+                                                            const destLob = getAgentLOB(agentName);
+                                                            if (origLob !== destLob) {
+                                                              warnings.push(`LOB Swap Rule: Reassigning from ${originalAgentName} (${origLob}) to ${agentName} (${destLob}).`);
+                                                            }
+
+                                                            const conflicts = getShiftConflicts(agentName, dateStr, shiftToMove.shiftLabel, shiftId);
+                                                            const allWarnings = [...warnings, ...conflicts];
+                                                            allWarnings.forEach((w) => toast.warning(w, { duration: 7500 }));
+
+                                                            return {
+                                                              ...shiftToMove,
+                                                              agentName: agentName,
+                                                              date: dateStr,
+                                                            };
+                                                          })();
+
+                                                          const oldUserDocId = originalAgentName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                                                          if (oldUserDocId) {
+                                                            await setDoc(
+                                                              doc(db, "users", oldUserDocId),
+                                                              {
+                                                                assignedShifts: {
+                                                                  [originalDate]: "Not Scheduled",
+                                                                },
+                                                              },
+                                                              { merge: true },
+                                                            );
+                                                            const oldAgentSchedulesRef = doc(
+                                                              collection(doc(collection(db, "agents"), oldUserDocId), "schedules"),
+                                                              originalDate,
+                                                            );
+                                                            await deleteDoc(oldAgentSchedulesRef).catch(() => {});
+                                                          }
+
+                                                          setSchedules((prev) => prev.filter((s) => s.id !== shiftId));
+                                                          await deleteDoc(doc(db, "schedules", shiftId));
+
+                                                          commitSchedulesManual([updatedShift], [], {});
+                                                          toast.success(`Moved ${originalAgentName}'s shift to ${dateStr}`);
+                                                        } catch (err: any) {
+                                                          console.error("Drop/reassign shift error:", err);
+                                                          toast.error("Failed to reassign shift.");
+                                                        }
+                                                      }}
+                                                      className={`p-1 border-r transition-all relative group ${draggedOverCell?.agentName?.toLowerCase() === agentName?.toLowerCase() && draggedOverCell?.date === dateStr ? "border-indigo-500 bg-indigo-500/10" : "border-white/8 hover:bg-white/20"} ${isSuperAdmin || isTLOreSupport ? "cursor-pointer" : "cursor-help"}`}
                                                     >
                                                       <div
-                                                        className={`mx-auto rounded-xl px-2 py-2 text-center border text-[11px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden`}
+                                                        draggable={findShift && (isSuperAdmin || isTLOreSupport) ? "true" : "false"}
+                                                        onDragStart={(e) => {
+                                                          if (!findShift || !(isSuperAdmin || isTLOreSupport)) return;
+                                                          e.dataTransfer.setData(
+                                                            "text/plain",
+                                                            JSON.stringify({
+                                                              shiftId: findShift.id,
+                                                              originalAgentName: findShift.agentName,
+                                                              originalDate: findShift.date,
+                                                            })
+                                                          );
+                                                        }}
+                                                        className={`mx-auto rounded-xl px-2 py-2 text-center border text-[11px] font-bold ${style.bg} transition-all flex items-center justify-center gap-1 relative overflow-hidden ${isSuperAdmin || isTLOreSupport ? "cursor-grab active:cursor-grabbing" : ""}`}
                                                       >
                                                         <span className="relative z-10">
                                                           {style.display}
@@ -24323,7 +24961,7 @@ ${ttNotes}`
                                                           findShift.activities
                                                             .length > 0) ||
                                                         isSuperAdmin) && (
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block bg-slate-900/40 border border-transparent text-slate-100 rounded-xl p-3 z-50 text-[11px] leading-relaxed">
+                                                        <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-900 border border-transparent text-slate-100 rounded-xl p-3 z-50 text-[11px] leading-relaxed transition-all ${activeInlineCell?.agentName?.toLowerCase() === agentName?.toLowerCase() && activeInlineCell?.date === dateStr ? "hidden" : "hidden group-hover:block"}`}>
                                                           <p className="font-bold text-indigo-300 border-b border-transparent pb-0.5 mb-1.5 flex items-center justify-between font-sans">
                                                             <span>Details</span>
                                                             <span className="text-slate-400 font-sans scale-75">
@@ -24397,6 +25035,113 @@ ${ttNotes}`
                                                           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-indigo-400/40"></div>
                                                         </div>
                                                       )}
+
+                                                      {/* Inline shift editor popover */}
+                                                      {activeInlineCell?.agentName?.toLowerCase() === agentName.toLowerCase() && activeInlineCell?.date === dateStr && (() => {
+                                                        const activeWarnings = getShiftConflicts(
+                                                          agentName,
+                                                          dateStr,
+                                                          manualRosterShift,
+                                                          activeInlineCell?.findShift?.id,
+                                                        );
+                                                        return (
+                                                          <div 
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-[100] w-72 p-4 bg-slate-900 border border-white/12 rounded-xl text-left text-slate-100 flex flex-col gap-3 font-sans"
+                                                          >
+                                                            <div className="flex justify-between items-center border-b border-white/8 pb-2">
+                                                              <div className="text-left">
+                                                                <h4 className="text-xs font-bold text-slate-200">Edit Shift Roster</h4>
+                                                                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{agentName} • {dateStr}</p>
+                                                              </div>
+                                                              <button 
+                                                                type="button"
+                                                                onClick={() => setActiveInlineCell(null)}
+                                                                className="p-1 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition"
+                                                              >
+                                                                <X className="w-3.5 h-3.5" />
+                                                              </button>
+                                                            </div>
+
+                                                            {/* Dropdown for Shifts */}
+                                                            <div className="space-y-1">
+                                                              <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Shift</label>
+                                                              <select
+                                                                value={manualRosterShift}
+                                                                onChange={(e) => setManualRosterShift(e.target.value)}
+                                                                className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                              >
+                                                                <option value="Off">Off / Rest Day</option>
+                                                                {SHIFTS.map((s) => (
+                                                                  <option key={s.id} value={s.label}>
+                                                                    {s.display} ({s.label})
+                                                                  </option>
+                                                                ))}
+                                                              </select>
+                                                            </div>
+
+                                                            {/* Notes */}
+                                                            <div className="space-y-1">
+                                                              <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Notes</label>
+                                                              <textarea
+                                                                value={manualRosterNotes}
+                                                                onChange={(e) => setManualRosterNotes(e.target.value)}
+                                                                placeholder="Add shift notes (optional)"
+                                                                rows={2}
+                                                                className="w-full bg-slate-800 border border-white/12 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+                                                              />
+                                                            </div>
+
+                                                            {/* Dynamic Warnings */}
+                                                            {activeWarnings.length > 0 && (
+                                                              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5 text-[10px] text-amber-400 space-y-1">
+                                                                <div className="font-bold flex items-center gap-1 font-sans">
+                                                                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                                                                  <span>Roster Conflict Warnings:</span>
+                                                                </div>
+                                                                <ul className="list-disc list-inside space-y-0.5">
+                                                                  {activeWarnings.map((w, idx) => (
+                                                                    <li key={idx} className="font-sans leading-relaxed">{w}</li>
+                                                                  ))}
+                                                                </ul>
+                                                              </div>
+                                                            )}
+
+                                                            {/* Actions */}
+                                                            <div className="flex gap-2 justify-end pt-1 border-t border-white/8">
+                                                              {findShift && (
+                                                                <button
+                                                                  type="button"
+                                                                  onClick={async () => {
+                                                                    await handleDeleteManualRoster(agentName, dateStr);
+                                                                    setActiveInlineCell(null);
+                                                                  }}
+                                                                  className="mr-auto px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold rounded-lg transition"
+                                                                >
+                                                                  Delete
+                                                                </button>
+                                                              )}
+                                                              <button
+                                                                type="button"
+                                                                onClick={() => setActiveInlineCell(null)}
+                                                                className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 text-[10px] font-bold rounded-lg transition"
+                                                              >
+                                                                Cancel
+                                                              </button>
+                                                              <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                  handleManualRosterSubmit(e);
+                                                                  setActiveInlineCell(null);
+                                                                }}
+                                                                className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-bold rounded-lg transition"
+                                                              >
+                                                                Save
+                                                              </button>
+                                                            </div>
+                                                          </div>
+                                                        );
+                                                      })()}
                                                     </td>
                                                   );
                                                 },
@@ -24407,6 +25152,7 @@ ${ttNotes}`
                                       </tbody>
                                     </table>
                                   </div>
+                                </div>
 
                                   {/* Mobile Grid Layout list of cards */}
                                   <div className="block lg:hidden space-y-4">
@@ -25123,7 +25869,7 @@ ${ttNotes}`
                                       }
                                       return (
                                         <table className="w-full text-[11px] font-sans">
-                                          <thead className="bg-[#1e1e2d] text-slate-400 text-[11px] font-bold uppercase tracking-wider sticky top-0 border-b border-white/8 font-sans">
+                                          <thead className="bg-white/8 text-slate-400 text-[11px] font-bold uppercase tracking-wider sticky top-0 border-b border-white/8 font-sans">
                                             <tr>
                                               <th className="px-4 py-3 text-left">
                                                 Agent Offering
