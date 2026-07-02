@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link as LinkIcon, Upload, X, FileText, Loader2, AlertCircle, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -43,6 +43,8 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const photosRef = useRef(photos);
+  useEffect(() => { photosRef.current = photos; }, [photos]);
 
   useEffect(() => {
     let mounted = true;
@@ -74,19 +76,29 @@ export const MultiAttachmentUpload: React.FC<MultiAttachmentUploadProps> = ({
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
-      await new Promise<void>((resolve, reject) => {
-        uploadTask.on('state_changed',
-          (snapshot) => {
-            const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            setUploadingFiles(prev => prev.map(f => f.tempId === tempId ? { ...f, progress: pct } : f));
-          },
-          (error) => reject(error),
-          () => resolve()
-        );
-      });
+      await Promise.race([
+        new Promise<void>((resolve, reject) => {
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+              setUploadingFiles(prev => prev.map(f => f.tempId === tempId ? { ...f, progress: pct } : f));
+            },
+            (error) => reject(error),
+            () => resolve()
+          );
+        }),
+        new Promise<void>((_, reject) =>
+          setTimeout(() => {
+            uploadTask.cancel();
+            reject(new Error('Upload timed out after 30s — check that Firebase Storage is enabled and on the Blaze plan for this project.'));
+          }, 30000)
+        )
+      ]);
 
       const url = await getDownloadURL(uploadTask.snapshot.ref);
-      onPhotosChange([...photos, url]);
+      const updated = [...photosRef.current, url];
+      photosRef.current = updated;
+      onPhotosChange(updated);
     } catch (err: any) {
       console.error('Upload failed', err);
       setUploadingFiles(prev => prev.map(f => f.tempId === tempId ? { ...f, error: 'Upload failed' } : f));
