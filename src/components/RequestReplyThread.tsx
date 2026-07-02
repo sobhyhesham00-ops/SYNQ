@@ -3,11 +3,6 @@ import { User, FileAttachment } from '../types';
 import { 
   MessageSquare, 
   Send, 
-  Download, 
-  X, 
-  Link as LinkIcon, 
-  Image as ImageIcon, 
-  Plus, 
   ChevronDown,
   ChevronUp,
   Shield,
@@ -15,8 +10,6 @@ import {
   UserPlus,
   ExternalLink,
   Activity,
-  CheckCircle,
-  MessageCircle,
   Clock,
   User as UserIcon
 } from 'lucide-react';
@@ -24,6 +17,7 @@ import { doc, arrayUnion } from 'firebase/firestore';
 import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { toast } from 'sonner';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
+import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 
 interface ThreadReply {
   id: string;
@@ -62,31 +56,11 @@ export function RequestReplyThread({
   requestAgentName?: string
 }) {
   const [text, setText] = useState('');
-  const [links, setLinks] = useState<string[]>([]);
-  const [showLinkInput, setShowLinkInput] = useState(false);
-  const [linkInput, setLinkInput] = useState('');
+  const [replyLinks, setReplyLinks] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(true);
+  const [replyPhotos, setReplyPhotos] = useState<string[]>([]);
 
   const newReplies = (request.replies || []).filter(r => r.senderName !== currentUser.name).length;
-
-  const handleAddLink = () => {
-    if (!String(linkInput || '').trim()) return;
-    let url = String(linkInput || '').trim();
-    if (!/^https?:\/\//i.test(url)) {
-      url = 'https://' + url;
-    }
-    if (links.includes(url)) {
-      toast.error('Link already added');
-      return;
-    }
-    setLinks([...links, url]);
-    setLinkInput('');
-    setShowLinkInput(false);
-  };
-
-  const handleRemoveLink = (index: number) => {
-    setLinks(links.filter((_, i) => i !== index));
-  };
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +76,7 @@ export function RequestReplyThread({
       }
     }
 
-    if (!String(text || '').trim() && links.length === 0) return;
+    if (!String(text || '').trim() && replyPhotos.length === 0 && replyLinks.length === 0) return;
 
     try {
       const newReply: ThreadReply = {
@@ -112,7 +86,9 @@ export function RequestReplyThread({
         authorRole: currentUser.role,
         text,
         createdAt: new Date().toISOString(),
-        links,
+        links: replyLinks,
+        screenshot: replyPhotos[0] || undefined,
+        photos: replyPhotos,
       };
 
       // Fallbacks for notifications if props were not provided
@@ -135,7 +111,11 @@ export function RequestReplyThread({
         const title = isAgentReplying
           ? `Agent Reply on ${computedRequestType || 'Request'}`
           : `TL Reply on Your ${computedRequestType || 'Request'}`;
-        const summaryText = text ? `"${text.substring(0, 80)}"` : `with ${links.length} link(s)`;
+        const summaryText = text 
+          ? `"${text.substring(0, 80)}"` 
+          : replyPhotos.length > 0 
+            ? `with ${replyPhotos.length} attachment(s)` 
+            : `with ${replyLinks.length} link(s)`;
         const message = isAgentReplying
           ? `${currentUser.name} replied to a ${computedRequestType || 'Request'}: ${summaryText}`
           : `${currentUser.name} replied to your ${computedRequestType || 'Request'}: ${summaryText}`;
@@ -152,7 +132,8 @@ export function RequestReplyThread({
 
       toast.success("Reply added!");
       setText('');
-      setLinks([]);
+      setReplyPhotos([]);
+      setReplyLinks([]);
     } catch(err) {
       console.error(err);
       toast.error("Failed to add reply");
@@ -348,33 +329,16 @@ export function RequestReplyThread({
       </div>
 
       <form onSubmit={handleReply} className="pt-4 border-t border-white/8 flex flex-col gap-3 relative text-left">
-          {/* Active links queue */}
-          {links.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              {links.map((linkStr, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white/5 border border-white/8 rounded-xl p-2 text-[11px] text-indigo-300 font-mono">
-                   <span className="truncate max-w-[400px]">{linkStr}</span>
-                   <button type="button" onClick={() => handleRemoveLink(idx)} className="text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 rounded p-1 transition-all"><X className="w-3.5 h-3.5" /></button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Expandable Link Input */}
-          {showLinkInput && (
-            <div className="flex items-center gap-2 p-2 bg-slate-950/60 border border-white/8 rounded-xl">
-              <LinkIcon className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
-              <input 
-                type="text" 
-                value={linkInput} 
-                onChange={e => setLinkInput(e.target.value)}
-                placeholder="Paste URL (e.g. Google Docs, Loom, Sheets, drive link...)" 
-                className="flex-grow bg-transparent text-[11px] text-white placeholder-slate-500 border-none outline-none focus:ring-0" 
-              />
-              <button type="button" onClick={handleAddLink} className="text-[11px] font-bold text-white bg-transparent border border-white/12 text-white hover:bg-white/5 rounded-xl px-3 py-1.5 active:scale-95 transition-all">Add Link</button>
-              <button type="button" onClick={() => setShowLinkInput(false)} className="text-slate-400 hover:text-rose-400 p-1.5 transition-all"><X className="w-3.5 h-3.5" /></button>
-            </div>
-          )}
+          <div className="bg-white/[0.03] p-4 border border-white/[0.06] rounded-xl">
+            <MultiAttachmentUpload
+              photos={replyPhotos}
+              links={replyLinks}
+              onPhotosChange={setReplyPhotos}
+              onLinksChange={setReplyLinks}
+              photosLabel="Attach screenshots & files to this timeline correspondence"
+              maxFiles={4}
+            />
+          </div>
           
           {/* CRM Compound Action Composer */}
           <div className="bg-white/[0.02] border border-white/8 rounded-xl p-3 flex flex-col gap-3">
@@ -401,22 +365,10 @@ export function RequestReplyThread({
               </div>
             )}
             
-            <div className="flex items-center justify-between border-t border-white/8 pt-2 flex-wrap gap-2">
-              <div className="flex gap-2">
-                <button 
-                  type="button" 
-                  onClick={() => setShowLinkInput(!showLinkInput)} 
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/8 transition-all cursor-pointer text-[11px] uppercase font-bold tracking-wider select-none ${showLinkInput ? 'bg-indigo-500/10 text-indigo-400 border-transparent' : ''}`} 
-                  title="Attach hyperlink"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Attach URL</span>
-                </button>
-              </div>
-              
+            <div className="flex items-center justify-end border-t border-white/8 pt-2 flex-wrap gap-2">
               <button 
                 type="submit" 
-                disabled={!String(text || '').trim() && links.length === 0} 
+                disabled={!String(text || '').trim() && replyPhotos.length === 0 && replyLinks.length === 0} 
                 className="px-4 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
