@@ -11022,7 +11022,7 @@ ${ttNotes}`
   return (
     <div
       id="scheduling-root"
-      className="min-h-screen bg-transparent text-slate-100 flex flex-col font-sans relative overflow-x-hidden antialiased"
+      className="min-h-screen bg-[#0f1117] text-[#f1f2f4] flex flex-col font-sans relative overflow-x-hidden antialiased"
     >
       <Toaster theme="dark" position="bottom-right" />
       <AIChatWidget />
@@ -11310,23 +11310,8 @@ ${ttNotes}`
                       onClick={() => setIsSynqVersionModalOpen(true)}
                       className="px-4 py-2 bg-white/[0.03] border border-transparent hover:border-transparent hover:bg-black/60 rounded-lg text-[11px] font-bold tracking-widest text-slate-300 hover:text-cyan-400 transition-all flex items-center gap-3 cursor-pointer relative group overflow-hidden"
                     >
-                      <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10" />
-                        <span
-                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-sonar"
-                          style={{
-                            animation:
-                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                          }}
-                        />
-                        <span
-                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40 animate-sonar"
-                          style={{
-                            animation:
-                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                            animationDelay: "1s",
-                          }}
-                        />
+                      <div className="relative w-2 h-2 shrink-0">
+                        <span className="absolute inset-0 rounded-full bg-cyan-400" />
                       </div>
                       <span className="font-sans uppercase">SYNQ V2.4.1</span>
                     </button>
@@ -11339,7 +11324,7 @@ ${ttNotes}`
           /* User Logged In Portal */
           <div className="flex-1 flex flex-col gap-6 my-4 lg:my-6">
             {/* Global Workspace Header / Navbar with Global Search */}
-            <header className="w-full bg-[#111116] border border-white/8 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 relative z-40">
+            <header className="w-full bg-[#16181f] border border-[rgba(255,255,255,0.07)] px-5 py-3 rounded-xl flex items-center justify-between gap-4 relative z-40">
               <div className="flex items-center gap-3">
                 <div className="text-left">
                   <motion.div
@@ -11355,14 +11340,14 @@ ${ttNotes}`
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ delay: 0.15, duration: 0.45 }}
-                        className="text-cyan-400 font-bold relative drop-"
+                        className="text-[#818cf8] font-bold"
                       >
                         {currentUser.name.split(" ")[0]}
                       </motion.span>
                       !
                     </h1>
                   </motion.div>
-                  <p className="text-[11px] text-slate-500 font-sans font-bold tracking-tight">
+                  <p className="text-[11px] text-[#565b69] font-medium">
                     {currentUser.role === "tl" ? "Team Leader" : currentUser.role === "director" ? "Director" : currentUser.role === "qa" ? "Quality Assurance" : "Agent"}
                   </p>
                 </div>
@@ -11371,7 +11356,7 @@ ${ttNotes}`
               {/* Timezones & Weather Active Control Selector */}
               <div
                 id="timezone-weather-selector"
-                className="flex items-center gap-4 bg-transparent border border-white/8 rounded-xl px-3 py-1.5"
+                className="flex items-center gap-4 bg-transparent border border-[rgba(255,255,255,0.07)] rounded-xl px-3 py-1.5"
               >
                 <div className="flex items-center gap-4 px-2">
                   {/* EGYPT DISPLAY */}
@@ -11379,7 +11364,7 @@ ${ttNotes}`
                     <div className="text-left font-sans">
                       <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
                         <span>🇪🇬 Cairo</span>
-                        <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />
+                        <span className="w-1 h-1 rounded-full bg-[#10B981]" />
                       </div>
                       <div className="text-[11px] font-bold text-slate-200">
                         {currentTime.toLocaleTimeString("en-US", {
@@ -11394,7 +11379,7 @@ ${ttNotes}`
                     {ramadanTemp !== null && (
                       <div className="flex items-center gap-1 text-[11px] font-sans text-[#FCD34D] bg-[#FCD34D]/5 border border-[#FCD34D]/15 px-1.5 py-0.5 rounded-xl select-none">
                         {ramadanWeatherCode === 0 ? (
-                          <Sun className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                          <Sun className="w-3.5 h-3.5 text-amber-400" />
                         ) : ramadanWeatherCode < 3 ? (
                           <Sun className="w-3.5 h-3.5 text-amber-400" />
                         ) : (
@@ -11415,7 +11400,7 @@ ${ttNotes}`
                     <div className="text-left font-sans">
                       <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.1">
                         <span>🇦🇪 Dubai</span>
-                        <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+                        <span className="w-1 h-1 rounded-full bg-cyan-400" />
                       </div>
                       <div className="text-[11px] font-bold text-slate-200">
                         {currentTime.toLocaleTimeString("en-US", {
@@ -11430,7 +11415,7 @@ ${ttNotes}`
                     {uaeTemp !== null && (
                       <div className="flex items-center gap-1 text-[11px] font-sans text-[#60A5FA] bg-[#60A5FA]/5 border border-[#60A5FA]/15 px-1.5 py-0.5 rounded-xl select-none">
                         {uaeWeatherCode === 0 ? (
-                          <Sun className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                          <Sun className="w-3.5 h-3.5 text-orange-400" />
                         ) : uaeWeatherCode < 3 ? (
                           <Sun className="w-3.5 h-3.5 text-orange-400" />
                         ) : (
@@ -11451,7 +11436,7 @@ ${ttNotes}`
                 id="global-search-container"
               >
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#565b69]">
                     <Search className="w-4 h-4" />
                   </span>
                   <input
@@ -11463,7 +11448,7 @@ ${ttNotes}`
                       setIsGlobalSearchPanelOpen(true);
                     }}
                     onFocus={() => setIsGlobalSearchPanelOpen(true)}
-                    className="w-full pl-9 pr-8 py-2 bg-white/5 border border-white/8 rounded-xl text-[11px] text-slate-100 focus:outline-none focus:border-indigo-500 focus:bg-white/10 placeholder:text-slate-500 transition-all font-sans"
+                    className="w-full pl-9 pr-8 py-2 bg-[#0f1117] border border-[rgba(255,255,255,0.07)] rounded-lg text-[13px] text-[#f1f2f4] focus:outline-none focus:border-[#5b6af0] placeholder:text-[#565b69] transition-all font-sans"
                   />
                   {globalSearchInput && (
                     <button
@@ -11485,7 +11470,7 @@ ${ttNotes}`
                       className="fixed inset-0 z-30"
                       onClick={() => setIsGlobalSearchPanelOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#1a1b23] border border-white/8 rounded-xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-white/5">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#16181f] border border-[rgba(255,255,255,0.08)] rounded-xl z-45 p-1.5 max-h-96 overflow-y-auto flex flex-col divide-y divide-[rgba(255,255,255,0.05)]">
                       <div className="p-3 text-[11px] text-slate-400 font-bold uppercase tracking-wider bg-[#1a1b23] flex items-center justify-between border-b border-white/8 rounded-t-xl font-mono">
                         <span>
                           Results for "{globalSearchInput}":{" "}
@@ -11638,14 +11623,14 @@ ${ttNotes}`
                   </button>
                 )}
                 <div className="hidden sm:block">
-                  <p className="text-[11px] font-bold text-slate-200">
+                  <p className="text-[12px] font-semibold text-[#f1f2f4]">
                     {currentUser.name}
                   </p>
-                  <p className="text-[11px] text-slate-500 font-mono font-bold uppercase tracking-widest">
+                  <p className="text-[11px] text-[#565b69] font-medium uppercase tracking-wider">
                     {currentUser.role || "Agent"}
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-indigo-500/10 border border-transparent flex items-center justify-center font-bold text-[11px] text-indigo-400 font-sans">
+                <div className="w-8 h-8 rounded-full bg-[rgba(91,106,240,0.15)] border border-[rgba(91,106,240,0.2)] flex items-center justify-center font-bold text-[11px] text-[#818cf8] font-sans">
                   {currentUser.name
                     ? currentUser.name
                         .split(" ")
@@ -11661,20 +11646,18 @@ ${ttNotes}`
             {/* Split Content structure */}
             <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-6">
               {/* Navigation / Sidebar Menu */}
-              <aside className="w-full md:w-64 border border-white/8 bg-transparent flex flex-col p-4 rounded-xl space-y-4">
+              <aside className="w-full md:w-56 bg-[#16181f] border border-[rgba(255,255,255,0.07)] flex flex-col p-3 rounded-xl gap-0">
                 {/* Egypt Local Time & 10th of Ramadan Weather */}
-                <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-3 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-400 to-indigo-500" />
+                <div className="p-3 rounded-lg bg-[#0f1117] border border-[rgba(255,255,255,0.06)] space-y-2">
 
                   <div className="flex justify-between items-center">
-                    <span className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-[#818cf8] uppercase tracking-widest flex items-center gap-2">
                       <span className="flex h-2 w-2 relative">
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#818cf8]"></span>
                       </span>
                       Cairo Time
                     </span>
-                    <span className="text-[11px] text-slate-400 font-mono tracking-wider">
+                    <span className="text-[11px] text-[#8a8f9e] font-mono tracking-wider">
                       {new Date().toLocaleDateString("en-US", {
                         timeZone: "Africa/Cairo",
                         month: "short",
@@ -11684,7 +11667,7 @@ ${ttNotes}`
                     </span>
                   </div>
 
-                  <div className="flex items-baseline justify-between py-1 border-y border-white/8">
+                  <div className="flex items-baseline justify-between py-1 border-y border-[rgba(255,255,255,0.07)]">
                     <p className="text-lg font-bold text-slate-100 font-sans tracking-tight">
                       {currentTime.toLocaleTimeString("en-US", {
                         timeZone: "Africa/Cairo",
@@ -11696,24 +11679,24 @@ ${ttNotes}`
                     </p>
                     {ramadanTemp !== null && (
                       <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-1 text-xs text-[#FCD34D] font-bold font-sans">
+                        <div className="flex items-center gap-1 text-xs text-[#f59e0b] font-bold font-sans">
                           {ramadanWeatherCode === 0 ? (
-                            <Sun className="w-4 h-4 text-amber-400 animate-pulse" />
+                            <Sun className="w-4 h-4 text-amber-400" />
                           ) : ramadanWeatherCode < 3 ? (
                             <Sun className="w-4 h-4 text-amber-400" />
                           ) : (
-                            <Cloudy className="w-4 h-4 text-slate-400" />
+                            <Cloudy className="w-4 h-4 text-[#8a8f9e]" />
                           )}
                           <span>{ramadanTemp.toFixed(1)}°C</span>
                         </div>
-                        <span className="text-[11px] text-amber-400/80 uppercase font-mono tracking-widest font-bold animate-pulse">
+                        <span className="text-[11px] text-amber-400/80 uppercase font-mono tracking-widest font-bold">
                           Real-time
                         </span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex justify-between items-center text-[11px] text-slate-400">
+                  <div className="flex justify-between items-center text-[11px] text-[#8a8f9e]">
                     <span className="truncate flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                       10th of Ramadan
@@ -11732,19 +11715,12 @@ ${ttNotes}`
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-16 h-12 bg-white/[0.03] rounded-xl flex items-center justify-center border border-transparent hover:border-transparent transition-all shrink-0 relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-indigo-500/5 opacity-40 pointer-events-none" />
-                        <CoolLogo className="w-14 h-10" showText={false} />
+                      <div className="w-10 h-10 rounded-lg bg-[rgba(91,106,240,0.12)] flex items-center justify-center shrink-0">
+                        <CoolLogo className="w-8 h-8" showText={false} />
                       </div>
                       <div>
-                        <h1 className="text-xs font-bold tracking-tight text-slate-100 font-sans">
-                          Synq
-                        </h1>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] text-indigo-300 font-bold uppercase tracking-wide">
-                            Work Portal
-                          </span>
-                        </div>
+                        <h1 className="text-[14px] font-bold text-[#f1f2f4] font-display tracking-tight">SYNQ</h1>
+                        <span className="text-[11px] text-[#565b69] font-medium">Work Portal</span>
                       </div>
                     </div>
 
@@ -11761,7 +11737,7 @@ ${ttNotes}`
                           );
                           if (nextState) triggerNotificationAlert();
                         }}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center w-10 h-10 ${ soundEnabled ? "bg-indigo-500/10 border-transparent text-indigo-400 hover:bg-indigo-500/10 hover:border-transparent" : "bg-rose-500/10 border-transparent text-rose-400 hover:bg-rose-500/10 hover:border-transparent" }`}
+                        className={`p-2 rounded-lg border border-[rgba(255,255,255,0.07)] transition-all cursor-pointer flex items-center justify-center w-8 h-8 bg-transparent ${ soundEnabled ? "text-[#8a8f9e] hover:text-[#f1f2f4]" : "text-rose-400 hover:text-rose-300" }`}
                         title={
                           soundEnabled
                             ? "Mute Notification Sounds"
@@ -11771,7 +11747,7 @@ ${ttNotes}`
                         {soundEnabled ? (
                           <Volume2 className="w-4 h-4" />
                         ) : (
-                          <VolumeX className="w-4 h-4 animate-pulse text-rose-400" />
+                          <VolumeX className="w-4 h-4 text-rose-400" />
                         )}
                       </button>
 
@@ -11779,7 +11755,7 @@ ${ttNotes}`
                       <button
                         id="notif-bell-btn"
                         onClick={() => setIsNotifDrawerOpen(true)}
-                        className="relative p-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/10 hover:border-white/15 transition-all text-slate-300 hover:text-slate-100 cursor-pointer group flex items-center justify-center w-10 h-10"
+                        className="relative p-2 rounded-lg bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.05)] transition-all text-[#8a8f9e] hover:text-[#f1f2f4] cursor-pointer flex items-center justify-center w-8 h-8"
                         title="Real-time Alerts Inbox"
                       >
                         <Bell className="w-4 h-4" />
@@ -11795,10 +11771,10 @@ ${ttNotes}`
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-white/[0.04] border border-cyan-500/15 space-y-4 relative overflow-hidden">
+                  <div className="p-3 rounded-lg bg-[#0f1117] border border-[rgba(255,255,255,0.06)] space-y-3">
                     <div className="flex items-center gap-3 relative">
                       <div className="relative shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-[#1c1c2e] border border-transparent flex items-center justify-center text-[11px] font-bold tracking-widest font-mono text-cyan-400">
+                        <div className="w-9 h-9 rounded-full bg-[rgba(91,106,240,0.15)] border border-[rgba(91,106,240,0.2)] flex items-center justify-center text-[11px] font-bold font-mono text-[#818cf8]">
                           {(currentUser?.name || "")
                             .split(".")
                             .map((n) => n[0])
@@ -11813,16 +11789,16 @@ ${ttNotes}`
                         </span>
                       </div>
                       <div className="overflow-hidden grow">
-                        <p className="text-[11px] font-bold text-slate-100 truncate tracking-wide">
+                        <p className="text-[12px] font-semibold text-[#f1f2f4] truncate">
                           {formatAgentName(currentUser.name)}
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
+                        <p className="text-[11px] text-[#565b69] mt-0.5">
                           Username:{" "}
-                          <span className="font-sans text-indigo-300 font-bold">
+                          <span className="font-sans text-[#8a8f9e] font-medium">
                             {currentUser.name}
                           </span>
                         </p>
-                        <p className="text-[11px] uppercase tracking-widest font-mono text-cyan-400 font-bold mt-1">
+                        <p className="text-[11px] uppercase tracking-wider font-mono text-[#818cf8] font-semibold mt-1">
                           {currentUser.role === "tl"
                             ? "Team Leader"
                             : supportAssignments[currentUser.name]
@@ -11860,7 +11836,7 @@ ${ttNotes}`
                           ))) && (
                         <button
                           onClick={handleInstallClick}
-                          className="w-full px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border border-transparent text-indigo-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full px-3 py-2 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.04)] text-[#8a8f9e] hover:text-[#f1f2f4] rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer mb-1"
                         >
                           <Download className="w-3.5 h-3.5" />
                           Download Desktop App
@@ -11902,9 +11878,9 @@ ${ttNotes}`
                           window.location.reload();
                         }, 1000);
                       }}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border border-transparent text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
+                      className="w-full px-3 py-2 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.04)] text-[#8a8f9e] hover:text-[#f1f2f4] rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer mb-1"
                     >
-                      <RefreshCw className="w-3.5 h-3.5 animate-pulse" />
+                      <RefreshCw className="w-3.5 h-3.5" />
                       Update App (Force Sync)
                     </button>
 
@@ -11913,7 +11889,7 @@ ${ttNotes}`
                     currentUser?.name?.toLowerCase() === "sobhyhesham00@gmail.com" ? (
                       <button
                         onClick={() => setIsResetPasswordModalOpen(true)}
-                        className="w-full px-3 py-1.5 bg-transparent border border-white/12 text-white hover:bg-white/5 border border-blue-500/10 text-blue-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
+                        className="w-full px-3 py-1.5 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.04)] text-[#8a8f9e] hover:text-[#f1f2f4] rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer mb-1"
                       >
                         <Key className="w-3.5 h-3.5" />
                         Reset Password
@@ -11923,33 +11899,15 @@ ${ttNotes}`
                     <button
                       type="button"
                       onClick={() => setIsSynqVersionModalOpen(true)}
-                      className="w-full px-3 py-2 bg-cyan-500/10 hover:bg-cyan-500/10 border border-transparent hover:border-transparent text-cyan-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-3 cursor-pointer mb-2 relative group overflow-hidden"
+                      className="w-full px-3 py-2 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(255,255,255,0.04)] text-[#565b69] hover:text-[#8a8f9e] rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer mb-1"
                     >
-                      <div className="relative w-2.5 h-2.5 flex items-center justify-center shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 z-10 animate-pulse" />
-                        <span
-                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/80"
-                          style={{
-                            animation:
-                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                          }}
-                        />
-                        <span
-                          className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400/40"
-                          style={{
-                            animation:
-                              "sonar-ring 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                            animationDelay: "1s",
-                          }}
-                        />
-                      </div>
                       <span className="font-sans">Synq v2.4.1</span>
                     </button>
 
                     <button
                       id="signout-button"
                       onClick={handleSignOut}
-                      className="w-full px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/10 border border-rose-500/10 text-rose-300 rounded-xl text-[11px] font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer mb-2"
+                      className="w-full px-3 py-1.5 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(244,63,94,0.08)] hover:border-[rgba(244,63,94,0.2)] text-[#8a8f9e] hover:text-rose-400 rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-2 cursor-pointer mb-1"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Sign Out Portal
@@ -11995,7 +11953,7 @@ ${ttNotes}`
                             },
                           );
                         }}
-                        className="w-full px-3 py-1.5 bg-red-950 border border-transparent text-red-200 hover:bg-red-900 rounded-xl text-[11px] font-bold transition-all mt-2 uppercase cursor-pointer"
+                        className="w-full px-3 py-1.5 bg-transparent border border-[rgba(255,255,255,0.07)] hover:bg-[rgba(244,63,94,0.08)] hover:border-[rgba(244,63,94,0.2)] text-[#8a8f9e] hover:text-rose-400 rounded-lg text-[11px] font-medium transition-all mt-2 uppercase cursor-pointer"
                       >
                         Factory Reset All Data
                       </button>
@@ -12006,32 +11964,24 @@ ${ttNotes}`
                 {/* Left Nav Elements */}
                 <nav className="flex-1 flex flex-col gap-1 overflow-y-auto pr-2 pb-4">
                   {(() => {
-                    const buildBtn = (id, icon, label, bgColors = "") => {
+                    const buildBtn = (id: string, icon: React.ReactNode, label: string, _bgColors = "") => {
                       const isActive = activeTab === id;
-                      const baseClass = isActive
-                        ? `${bgColors} text-white scale-[1.02] font-bold border`
-                        : "border-transparent text-slate-300 hover:bg-white/20 /60 hover:text-white border font-medium hover:scale-[1.01]";
-
                       return (
                         <button
                           key={id}
                           onClick={() => setActiveTab(id)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 text-xs ${baseClass} group`}
+                          className={`synq-nav-btn${isActive ? " active" : ""}`}
                         >
-                          <span className="flex items-center gap-2">
-                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? "opacity-100" : "opacity-40"} ${bgColors.includes("emerald") ? "bg-emerald-400" : bgColors.includes("indigo") ? "bg-indigo-400" : bgColors.includes("amber") ? "bg-amber-400" : bgColors.includes("rose") ? "bg-rose-400" : bgColors.includes("red") ? "bg-red-400" : bgColors.includes("sky") ? "bg-sky-400" : bgColors.includes("orange") ? "bg-orange-400" : bgColors.includes("pink") ? "bg-pink-400" : bgColors.includes("purple") ? "bg-purple-400" : bgColors.includes("yellow") ? "bg-yellow-400" : bgColors.includes("cyan") ? "bg-cyan-400" : "bg-slate-400"}`} />
-                            {label}
+                          <span className={isActive ? "text-[#818cf8]" : "text-[#565b69]"}>
+                            {icon}
                           </span>
+                          <span className="truncate">{label}</span>
                         </button>
                       );
                     };
 
-                    const groupTitle = (title, emoji, color) => (
-                      <span
-                        className={`text-[11px] tracking-wider uppercase font-bold ${color} block px-3 mt-4 mb-1.5`}
-                      >
-                        {emoji} {title}
-                      </span>
+                    const groupTitle = (title: string, _emoji?: string, _color?: string) => (
+                      <span className="synq-nav-group">{title}</span>
                     );
 
                     if (isTLOreSupport) {
@@ -12318,29 +12268,13 @@ ${ttNotes}`
                   })()}
                 </nav>
 
-                {/* Mini Standalone Disclaimer block */}
-                <div className="mt-auto pt-4 border-t border-white/8 text-[11px] text-slate-400 space-y-2">
-                  <div className="flex items-center gap-2 text-indigo-300 font-semibold font-sans">
-                    <Info className="w-3.5 h-3.5 text-indigo-400" /> STANDALONE
-                    COMPLIANT
-                  </div>
-                  <p>
-                    This web application executes and persists database
-                    operations client-side, enabling full utility offline or
-                    loaded locally on any PC.
-                  </p>
+                <div className="mt-auto pt-3 border-t border-[rgba(255,255,255,0.06)] text-[11px] text-[#565b69] leading-relaxed">
+                  <p>Operates fully offline — all data persisted client-side.</p>
                 </div>
               </aside>
 
               {/* Primary Content Screen */}
-              <main
-                className={`flex-1 flex flex-col gap-6 overflow-y-auto overflow-x-hidden relative pb-8 ${ currentUser.role === "tl" ? "" : supportAssignments[currentUser.name] ? "" : "" }`}
-              >
-                {/* Role-Specific Background Accent Blur */}
-                <div
-                  className={`absolute top-[-10%] left-[20%] w-[60%] h-[20%] blur-[120px] opacity-20 pointer-events-none rounded-full ${ currentUser.role === "tl" ? "bg-indigo-500" : supportAssignments[currentUser.name] ? "bg-amber-500" : "bg-emerald-500" }`}
-                />
-
+              <main className="flex-1 flex flex-col gap-5 overflow-y-auto overflow-x-hidden relative pb-8">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}
@@ -12704,7 +12638,7 @@ ${ttNotes}`
                             .map((req) => (
                               <div
                                 key={req.id}
-                                className="relative overflow-hidden p-5 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-amber-950/40 via-yellow-950/25 to-slate-950/80 border-transparent"
+                                className="relative p-4 rounded-xl border border-[rgba(245,158,11,0.2)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[rgba(245,158,11,0.05)]"
                               >
                                 {/* Glow indicator line */}
                                 <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-amber-400 to-yellow-500"></div>
@@ -31042,24 +30976,6 @@ ${ttNotes}`
               </div>
 
               <div className="py-5 px-6 bg-black/50 border border-transparent rounded-xl relative overflow-hidden flex flex-col items-center">
-                {/* Sonar ambient waves radiating in the background underneath the text */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-                  <div
-                    className="absolute w-24 h-24 rounded-full border border-transparent"
-                    style={{
-                      animation:
-                        "sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                    }}
-                  />
-                  <div
-                    className="absolute w-24 h-24 rounded-full border border-cyan-500/15"
-                    style={{
-                      animation:
-                        "sonar-ring 4s cubic-bezier(0.1, 0.8, 0.3, 1) infinite",
-                      animationDelay: "2s",
-                    }}
-                  />
-                </div>
                 <p
                   className="text-xs font-bold text-slate-100 relative z-10 tracking-wide select-none"
                   style={{

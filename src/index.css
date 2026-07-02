@@ -1,402 +1,161 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
 @theme {
-  /* iOS Dark Mode Color Palette Overrides */
-  --color-slate-50: #ffffff;
-  --color-slate-100: #ffffff;
-  --color-slate-200: #ebebf5;
-  --color-slate-300: #d1d1d6;
-  --color-slate-400: #aeaeb2;
-  --color-slate-500: #8e8e93;
-  --color-slate-600: #636366;
-  --color-slate-700: #48484a;
-  --color-slate-800: #2c2c2e;
-  --color-slate-900: #1c1c1e;
-  --color-slate-950: #000000;
-
-  --color-indigo-300: #64d2ff;
-  --color-indigo-400: #409cff;
-  --color-indigo-500: #0a84ff;
-  --color-indigo-600: #007aff;
-  --color-indigo-700: #0060d1;
-  --color-indigo-800: #004aa6;
-  --color-indigo-900: rgba(10, 132, 255, 0.15);
-
-  --color-purple-500: #bf5af2;
-  --color-purple-400: #d484f5;
-  --color-purple-900: rgba(191, 90, 242, 0.15);
-
-  --color-emerald-500: #30d158;
-  --color-emerald-400: #32d74b;
-  --color-emerald-900: rgba(48, 209, 88, 0.15);
-
-  --color-rose-500: #ff453a;
-  --color-rose-400: #ff6961;
-  --color-rose-900: rgba(255, 69, 58, 0.15);
-
-  --color-amber-500: #ff9f0a;
-  --color-amber-400: #ffb340;
-  --color-amber-900: rgba(255, 159, 10, 0.15);
-
-  --color-cyan-500: #64d2ff;
-  --color-cyan-400: #87ddff;
-  --color-cyan-900: rgba(100, 210, 255, 0.15);
-
-  --color-pink-500: #ff375f;
-  --color-pink-400: #ff6080;
-  --color-pink-900: rgba(255, 55, 95, 0.15);
-
-  --color-blue-500: #0a84ff;
-  --color-blue-400: #409cff;
-  --color-blue-900: rgba(10, 132, 255, 0.15);
-
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* iOS characteristic softer rounded corners */
-  --radius-xl: 14px;
+  --color-surface:    #0f1117;
+  --color-card:       #16181f;
+  --color-border:     rgba(255,255,255,0.07);
+  --color-text-1:     #f1f2f4;
+  --color-text-2:     #8a8f9e;
+  --color-text-3:     #565b69;
+  --color-accent:     #5b6af0;
+  --color-accent-dim: rgba(91,106,240,0.12);
+
+  --color-emerald-500: #22c55e;
+  --color-rose-500:    #f43f5e;
+  --color-amber-500:   #f59e0b;
+  --color-sky-500:     #0ea5e9;
+  --color-indigo-500:  #6366f1;
+  --color-purple-500:  #a855f7;
+  --color-orange-500:  #f97316;
+  --color-cyan-500:    #06b6d4;
+  --color-green-500:   #22c55e;
+  --color-pink-500:    #ec4899;
+  --color-yellow-500:  #eab308;
+  --color-teal-500:    #14b8a6;
+  --color-red-500:     #ef4444;
+
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  14px;
   --radius-2xl: 18px;
-  --radius-3xl: 22px;
 }
 
 @layer base {
   body {
     font-family: var(--font-sans);
-    background-color: #000000;
-    color: #ffffff;
-    /* Remove the heavy space gradient for clean iOS dark mode background */
+    background-color: #0f1117;
+    color: #f1f2f4;
     background-image: none;
-    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.1); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+
+  select {
+    background-color: #16181f !important;
+    color: #f1f2f4 !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    appearance: none;
+    cursor: pointer;
+  }
+  select:hover  { border-color: rgba(255,255,255,0.15) !important; }
+  select:focus  { border-color: #5b6af0 !important; box-shadow: 0 0 0 2px rgba(91,106,240,0.2) !important; outline: none; }
+  select option { background-color: #1e2029 !important; color: #f1f2f4 !important; }
 }
 
-/* Slim dark scrollbars for the app */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-html {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-}
-
-/* Elegant and colored dropdown menu overrides across all sections */
-select {
-  background-color: #1c1c1e !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0, 0.2) !important;
-  transition: all 0.2s ease-in-out;
-  cursor: pointer;
-  appearance: none; /* remove default arrow to let SVG handle or just keep clean */
-}
-
-select:hover {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-select:focus {
-  border-color: #0a84ff !important;
-  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.3) !important;
-  outline: none;
-}
-
-select option {
-  background-color: #2c2c2e !important;
-  color: #ffffff !important;
-  padding: 8px !important;
-}
-
-select optgroup {
-  background-color: #1c1c1e !important;
-  color: #8e8e93 !important;
-  font-weight: 600;
-}
-
-/* iOS Premium Light Theme Overrides */
-body.theme-light {
-  background-color: #f2f2f7;
-  color: #1c1c1e;
-}
-
-body.theme-light #scheduling-root {
-  color: #1c1c1e;
-}
-
-body.theme-light .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.03) !important;
-}
-body.theme-light .bg-white\/10 {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
-body.theme-light .border-white\/5 {
-  border-color: rgba(0, 0, 0, 0.05) !important;
-}
-body.theme-light .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.09) !important;
-}
-body.theme-light .text-slate-100 {
-  color: #1c1c1e !important;
-}
-body.theme-light .text-slate-200 {
-  color: #1c1c1e !important;
-}
-body.theme-light .text-slate-300 {
-  color: #2c2c2e !important;
-}
-body.theme-light .text-slate-400 {
-  color: #55555c !important;
-}
-body.theme-light .bg-slate-900\/40 {
-  background-color: rgba(255, 255, 255, 0.75) !important;
-}
-body.theme-light .bg-slate-950\/45 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-body.theme-light .bg-slate-950\/30 {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-}
-body.theme-light .bg-slate-950\/15 {
-  background-color: rgba(255, 255, 255, 0.5) !important;
-}
-body.theme-light .bg-slate-950\/60 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-}
-body.theme-light .bg-slate-950 {
-  background-color: #f2f2f7 !important;
-}
-body.theme-light select {
-  background-color: #ffffff !important;
-  color: #1c1c1e !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-body.theme-light select option {
-  background-color: #ffffff !important;
-  color: #1c1c1e !important;
-}
-body.theme-light .bg-\[\#1C1C1E\] {
-  background-color: #e5e5ea !important;
-  color: #1c1c1e !important;
-}
-body.theme-light textarea {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  color: #1c1c1e !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-body.theme-light input {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  color: #1c1c1e !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-body.theme-light .bg-slate-900\/50 {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  color: #1c1c1e !important;
-}
-body.theme-light .text-slate-500 {
-  color: #6c6c70 !important;
-}
-body.theme-light .bg-slate-800\/80 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-body.theme-light .bg-slate-850\/80 {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-}
-body.theme-light .to-slate-950 {
-  --tw-gradient-to: #ebebf5 !important;
-}
-body.theme-light .from-slate-900 {
-  --tw-gradient-from: #ffffff !important;
-}
-body.theme-light .bg-slate-900 {
-  background-color: #ffffff !important;
-}
-body.theme-light .text-white {
-  color: #1c1c1e !important;
-}
-body.theme-light .bg-indigo-600\/90 {
-  color: #ffffff !important;
-}
-body.theme-light .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
-body.theme-light .shadow-inner {
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03) !important;
-}
-body.theme-light #sched-announcements-banner {
-  background: white !important;
-  color: #1c1c1e !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-body.theme-light .text-slate-200 {
-  color: #1c1c1e !important;
-}
-body.theme-light .text-indigo-100 {
-  color: #ffffff !important;
-}
-body.theme-light .text-amber-400 {
-  color: #d97706 !important;
-}
-body.theme-light .text-amber-300 {
-  color: #b45309 !important;
-}
-body.theme-light .bg-amber-500\/15 {
-  background-color: rgba(217, 119, 6, 0.08) !important;
-}
-
-/* Eye-safe rich tones for custom branding in light mode */
-body.theme-light .text-cyan-400 {
-  color: #0891b2 !important; /* Rich eye-safe turquoise */
-}
-body.theme-light .text-cyan-300 {
-  color: #097d9c !important;
-}
-body.theme-light .text-indigo-300 {
-  color: #4f46e5 !important; /* Elegant corporate indigo */
-}
-body.theme-light .text-purple-300 {
-  color: #7c3aed !important;
-}
-body.theme-light .bg-black\/40, 
-body.theme-light .bg-black\/50,
-body.theme-light .bg-black\/30 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  color: #1c1c1e !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
-}
-body.theme-light .border-cyan-500\/15,
-body.theme-light .border-cyan-500\/20,
-body.theme-light .border-cyan-500\/30 {
-  border-color: rgba(6, 182, 212, 0.22) !important;
-}
-body.theme-light .bg-gradient-to-br.from-cyan-500\/5 {
-  background-image: linear-gradient(to bottom right, rgba(6, 182, 212, 0.04), rgba(79, 70, 229, 0.04)) !important;
-}
-body.theme-light .shadow-\[0_4px_20px_rgba\(0\,0\,0\,0\.3\)\] {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03) !important;
-}
-body.theme-light .shadow-\[0_4px_25px_rgba\(0\,0\,0\,0\.35\)\] {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
-}
-body.theme-light .bg-cyan-500\/10 {
-  background-color: rgba(6, 182, 212, 0.08) !important;
-}
-body.theme-light .bg-rose-500\/10 {
-  background-color: rgba(244, 63, 94, 0.08) !important;
-}
-body.theme-light .bg-blue-500\/10 {
-  background-color: rgba(59, 130, 246, 0.08) !important;
-}
-body.theme-light .bg-emerald-500\/10 {
-  background-color: rgba(16, 185, 129, 0.08) !important;
-}
-body.theme-light .text-indigo-200 {
-  color: #4f46e5 !important;
-}
-
-/* ─── CLEAN UI OVERRIDES ───────────────────────────────────────────────────
-   Strips heavy drop shadows, noisy backdrop blurs, and loud card gradients
-   globally. Color palette, borders, and accent tints are fully preserved.
-   Shadows on interactive elements (buttons, focused inputs) are kept subtle.
-────────────────────────────────────────────────────────────────────────── */
-/* 1. Kill heavy outer shadows on all containers and cards */
-.shadow-2xl,
-.shadow-xl {
+/* ── Kill ALL shadows ── */
+*, *::before, *::after {
   box-shadow: none !important;
+  text-shadow: none !important;
 }
-/* 2. Reduce medium shadows to a hairline depth hint only */
-.shadow-lg,
-.shadow-md {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
-}
-/* 3. Flatten inset shadows — they create a "pressed down" muddy look */
-.shadow-inner,
-.shadow-sm {
-  box-shadow: none !important;
-}
-/* 4. Remove coloured glow shadows on buttons (indigo, emerald, rose, etc.)
-   These are the shadow-indigo-500/, shadow-emerald-500/ etc. classes.
-   Tailwind compiles them to --tw-shadow so we reset that variable. */
-[class="shadow-indigo"],
-[class*="shadow-emerald"],
-[class*="shadow-rose"],
-[class*="shadow-amber"],
-[class*="shadow-cyan"],
-[class*="shadow-purple"],
-[class*="shadow-fuchsia"],
-[class*="shadow-pink"],
-[class*="shadow-violet"],
-[class*="shadow-teal"],
-[class*="shadow-blue"],
-[class*="shadow-yellow"],
-[class*="shadow-red"],
-[class*="shadow-black"],
-[class*="shadow-white"] {
-  --tw-shadow-color: transparent !important;
-  --tw-shadow: 0 0 0 transparent !important;
-  box-shadow: 0 0 0 transparent !important;
-}
-/* 5. Reduce heavy backdrop blurs — keep only a very light frosted hint */
-.backdrop-blur-xl,
-.backdrop-blur-2xl,
-.backdrop-blur-3xl {
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
-}
-.backdrop-blur-lg {
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-}
-.backdrop-blur-md {
-  backdrop-filter: blur(3px) !important;
-  -webkit-backdrop-filter: blur(3px) !important;
-}
-/* 6. Strip the box-shadow from the global select override — border is enough */
-select {
-  box-shadow: none !important;
-}
-select:focus {
-  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.4) !important;
-}
-/* 7. Drop shadow on drop-shadow filter utilities (used on some text/icons) */
-[class="drop-shadow"] {
-  filter: none !important;
+/* Restore only focus rings */
+input:focus, textarea:focus, select:focus {
+  box-shadow: 0 0 0 2px rgba(91,106,240,0.25) !important;
 }
 
-/* Suppress Vite Error Overlay */
-vite-error-overlay {
-  display: none !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* ── Kill ALL backdrop blurs ── */
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
+/* ── Kill drop-shadow filters ── */
+[class*="drop-shadow"] { filter: none !important; }
+
+/* ── Kill ALL gradient backgrounds ── */
+[class*="bg-gradient"] {
+  background-image: none !important;
+}
+
+/* ── Suppress Vite error overlay ── */
+vite-error-overlay { display: none !important; }
+
+/* ── Bell animation ── */
 @keyframes notif-bell-ring {
-  0%   { transform: rotate(0deg) scale(1); }
-  15%  { transform: rotate(-18deg) scale(1.15); }
-  30%  { transform: rotate(18deg) scale(1.15); }
-  45%  { transform: rotate(-12deg) scale(1.1); }
-  60%  { transform: rotate(12deg) scale(1.1); }
-  75%  { transform: rotate(-6deg) scale(1.05); }
-  90%  { transform: rotate(6deg) scale(1.05); }
-  100% { transform: rotate(0deg) scale(1); }
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(-18deg); }
+  30%  { transform: rotate(18deg); }
+  60%  { transform: rotate(-6deg); }
+  100% { transform: rotate(0deg); }
 }
-
 #notif-bell-btn.notif-bell-ring svg {
-  animation: notif-bell-ring 0.6s ease-in-out;
-  animation-iteration-count: 2;
+  animation: notif-bell-ring 0.5s ease-in-out 2;
   transform-origin: top center;
 }
+
+/* ── Sonar/pulse animations: remove ── */
+@keyframes sonar-ring {
+  0%, 100% { transform: scale(1); opacity: 0; }
+}
+
+/* ── Nav items ── */
+.synq-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #8a8f9e;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  text-align: left;
+}
+.synq-nav-btn:hover { background: rgba(255,255,255,0.05); color: #f1f2f4; }
+.synq-nav-btn.active { background: rgba(91,106,240,0.12); color: #818cf8; font-weight: 600; }
+.synq-nav-btn svg { flex-shrink: 0; width: 15px; height: 15px; }
+
+/* ── Nav group title ── */
+.synq-nav-group {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #565b69;
+  padding: 14px 10px 5px;
+}
+
+/* ── Flat ghost button base (replaces gradient buttons) ── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: #8a8f9e;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.05); color: #f1f2f4; border-color: rgba(255,255,255,0.12); }

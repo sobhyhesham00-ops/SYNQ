@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import { User, FileAttachment } from '../types';
 import { 
   MessageSquare, 
-  Paperclip, 
   Send, 
   Download, 
   X, 
   Link as LinkIcon, 
-  File, 
   Image as ImageIcon, 
   Plus, 
-  Loader2,
   ChevronDown,
   ChevronUp,
   Shield,
@@ -26,10 +23,7 @@ import {
 import { doc, arrayUnion } from 'firebase/firestore';
 import { db, wrappedUpdateDoc as updateDoc } from '../firebase';
 import { toast } from 'sonner';
-import { compressImage } from '../utils';
-import { processAttachments } from '../services/attachmentService';
 import { AttachmentsDisplay } from './AttachmentsDisplay';
-import { MultiAttachmentUpload } from './MultiAttachmentUpload';
 
 interface ThreadReply {
   id: string;
@@ -68,66 +62,12 @@ export function RequestReplyThread({
   requestAgentName?: string
 }) {
   const [text, setText] = useState('');
-  const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [links, setLinks] = useState<string[]>([]);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkInput, setLinkInput] = useState('');
   const [isOpen, setIsOpen] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [replyPhotos, setReplyPhotos] = useState<string[]>([]);
 
   const newReplies = (request.replies || []).filter(r => r.senderName !== currentUser.name).length;
-
-  const handleMultipleFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    
-    const limit = 4;
-    if (attachments.length >= limit) {
-      toast.error(`You can only upload up to ${limit} attachments.`);
-      return;
-    }
-    
-    setIsUploading(true);
-    const filesArray = Array.from(files);
-    const newAttachments: FileAttachment[] = [];
-
-    for (let i = 0; i < filesArray.length; i++) {
-      if (attachments.length + newAttachments.length >= limit) {
-        toast.error(`Attachment limit of ${limit} reached. Skipped remaining files.`);
-        break;
-      }
-      const file = filesArray[i];
-      
-      // Size limit (Max 10MB per file)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`File "${file.name}" is too large. Max size is 10MB.`);
-        continue;
-      }
-
-      try {
-        const previewUrl = URL.createObjectURL(file);
-        
-        newAttachments.push({
-          id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: file.name,
-          type: file.type || 'application/octet-stream',
-          size: file.size,
-          url: previewUrl,
-          file: file
-        });
-      } catch (err) {
-        console.error('File load error', err);
-        toast.error(`Failed to load "${file.name}"`);
-      }
-    }
-
-    if (newAttachments.length > 0) {
-      setAttachments(prev => [...prev, ...newAttachments]);
-      toast.success(`Successfully loaded ${newAttachments.length} file(s)`);
-    }
-    
-    setIsUploading(false);
-  };
 
   const handleAddLink = () => {
     if (!String(linkInput || '').trim()) return;
@@ -148,10 +88,6 @@ export function RequestReplyThread({
     setLinks(links.filter((_, i) => i !== index));
   };
 
-  const handleRemoveAttachment = (index: number) => {
-    setAttachments(attachments.filter((_, i) => i !== index));
-  };
-
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -166,21 +102,9 @@ export function RequestReplyThread({
       }
     }
 
-    if (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0) return;
+    if (!String(text || '').trim() && links.length === 0) return;
 
     try {
-      const eType = collectionName === 'inquiries' ? 'inquiry' :
-                    collectionName === 'scheduling_requests' ? 'scheduling' :
-                    collectionName === 'tt_complaints' ? 'tt_complaint' :
-                    collectionName === 'client_comms' ? 'client_comm' : 'tt_request';
-
-      const processedAttachments = await processAttachments(
-        attachments,
-        eType,
-        request.id,
-        "reply"
-      );
-
       const newReply: ThreadReply = {
         id: `rpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         authorId: currentUser.id,
@@ -188,10 +112,7 @@ export function RequestReplyThread({
         authorRole: currentUser.role,
         text,
         createdAt: new Date().toISOString(),
-        attachments: processedAttachments,
         links,
-        screenshot: replyPhotos[0] || undefined,  // backward compat
-        photos: replyPhotos,                       // new field
       };
 
       // Fallbacks for notifications if props were not provided
@@ -214,7 +135,7 @@ export function RequestReplyThread({
         const title = isAgentReplying
           ? `Agent Reply on ${computedRequestType || 'Request'}`
           : `TL Reply on Your ${computedRequestType || 'Request'}`;
-        const summaryText = text ? `"${text.substring(0, 80)}"` : `with ${attachments.length} attachment(s)`;
+        const summaryText = text ? `"${text.substring(0, 80)}"` : `with ${links.length} link(s)`;
         const message = isAgentReplying
           ? `${currentUser.name} replied to a ${computedRequestType || 'Request'}: ${summaryText}`
           : `${currentUser.name} replied to your ${computedRequestType || 'Request'}: ${summaryText}`;
@@ -231,9 +152,7 @@ export function RequestReplyThread({
 
       toast.success("Reply added!");
       setText('');
-      setAttachments([]);
       setLinks([]);
-      setReplyPhotos([]);
     } catch(err) {
       console.error(err);
       toast.error("Failed to add reply");
@@ -429,45 +348,6 @@ export function RequestReplyThread({
       </div>
 
       <form onSubmit={handleReply} className="pt-4 border-t border-white/8 flex flex-col gap-3 relative text-left">
-          {/* MultiAttachmentUpload for reply screenshots */}
-          <div className="bg-white/[0.03] p-4 border border-white/[0.06] rounded-xl">
-            <MultiAttachmentUpload
-              photos={replyPhotos}
-              links={[]}
-              onPhotosChange={setReplyPhotos}
-              onLinksChange={() => {}}
-              photosLabel='Attach screenshots & files to this timeline correspondence'
-            />
-          </div>
-
-          {/* Active file attachments queue */}
-          {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-2.5 p-2 bg-white/[0.03] rounded-xl border border-white/8">
-              {attachments.map((att, idx) => {
-                const isImage = att.type?.startsWith('image/');
-                return (
-                  <div key={att.id} className="relative group w-16 h-16 rounded-xl border border-white/15 overflow-hidden bg-white/[0.04]">
-                    {isImage ? (
-                      <img referrerPolicy="no-referrer" src={att.url} alt="Screenshot queue" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-800">
-                        <File className="w-5 h-5 text-slate-400" />
-                        <span className="text-[11px] text-slate-400 font-bold truncate max-w-[50px] uppercase mt-0.5">{att.name}</span>
-                      </div>
-                    )}
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemoveAttachment(idx)} 
-                      className="absolute top-1 right-1 bg-black/90 p-1 rounded-full text-white hover:text-rose-400 cursor-pointer active:scale-95 transition-all"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
           {/* Active links queue */}
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5">
@@ -523,16 +403,6 @@ export function RequestReplyThread({
             
             <div className="flex items-center justify-between border-t border-white/8 pt-2 flex-wrap gap-2">
               <div className="flex gap-2">
-                <label className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 border border-white/8 transition-all cursor-pointer text-[11px] uppercase font-bold tracking-wider select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`} title="Attach files/images">
-                  {isUploading ? (
-                    <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin" />
-                  ) : (
-                    <Paperclip className="w-3.5 h-3.5" />
-                  )}
-                  <span>Attach Document</span>
-                  <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" onChange={e => handleMultipleFiles(e.target.files)} className="hidden" disabled={isUploading} />
-                </label>
-
                 <button 
                   type="button" 
                   onClick={() => setShowLinkInput(!showLinkInput)} 
@@ -546,8 +416,8 @@ export function RequestReplyThread({
               
               <button 
                 type="submit" 
-                disabled={isUploading || (!String(text || '').trim() && attachments.length === 0 && links.length === 0 && replyPhotos.length === 0)} 
-                className="px-4 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer hover:"
+                disabled={!String(text || '').trim() && links.length === 0} 
+                className="px-4 py-2 rounded-xl bg-transparent border border-white/12 text-white hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] uppercase font-bold tracking-widest flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Publish Update</span>

@@ -1,4 +1,4 @@
-import { storage } from "../firebase";
+import { storage, ensureAuth, auth } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL, UploadTask } from "firebase/storage";
 import { FileAttachment } from "../types";
 
@@ -21,6 +21,12 @@ export const processAttachments = async (
   replyOrRoot: string
 ): Promise<FileAttachment[]> => {
   if (!attachments || attachments.length === 0) return [];
+
+  // Ensure Firebase anonymous auth is active before attempting any Storage write
+  const user = auth.currentUser || await ensureAuth();
+  if (!user) {
+    throw new Error('Authentication required to upload attachments. Please refresh and try again.');
+  }
 
   const processed = await Promise.all(
     attachments.map((att) => {
@@ -45,8 +51,8 @@ export const processAttachments = async (
             console.log(`Upload progress for ${file.name}: ${progress.toFixed(2)}%`);
           },
           (error) => {
-            console.error(`Upload error for ${file.name}:`, error);
-            reject(new Error(`Failed to upload ${file.name}: ${error.message}`));
+            console.error(`[attachmentService] Upload error for ${file.name}:`, error.code, error.message);
+            reject(new Error(`Failed to upload ${file.name} (${error.code}): ${error.message}`));
           },
           async () => {
             try {
